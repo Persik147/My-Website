@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ApkHub — каталог APK приложений</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --card-bg: #fff;
+      --text-color: #222;
+      --accent: #4a90e2;
+      --accent-dark: #357ABD;
+      --border: #ddd;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --font-family: 'Manrope', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--accent);
+      color: white;
+      padding: 20px 24px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    header h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 1.2px;
+    }
+
+    main {
+      flex: 1;
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 16px;
+      width: 100%;
+    }
+
+    .add-app-form {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+    }
+
+    .add-app-form h2 {
+      margin-top: 0;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent-dark);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: var(--font-family);
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    input[type="file"]:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--accent-dark);
+    }
+
+    .apps-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .app-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease;
+      word-break: break-word;
+    }
+
+    .app-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0 0 8px;
+      color: var(--accent-dark);
+    }
+
+    .app-description {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+
+    .app-file {
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .app-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .app-actions a,
+    .app-actions button {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      background-color: var(--accent);
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .app-actions a:hover,
+    .app-actions button:hover {
+      background-color: var(--accent-dark);
+    }
+
+    .error-message {
+      color: #b00020;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    footer {
+      background-color: #222;
+      color: #ccc;
+      text-align: center;
+      padding: 16px 12px;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    @media (max-width: 480px) {
+      .apps-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ApkHub</h1>
+  </header>
+
+  <main>
+    <section class="add-app-form" aria-label="Добавить новое приложение">
+      <h2>Добавить APK приложение</h2>
+      <div id="error" class="error-message" role="alert" aria-live="assertive" style="display:none;"></div>
+      <form id="appForm" novalidate>
+        <div class="form-group">
+          <label for="appName">Название приложения</label>
+          <input type="text" id="appName" name="appName" placeholder="Введите название" required />
+        </div>
+        <div class="form-group">
+          <label for="appDescription">Описание</label>
+          <textarea id="appDescription" name="appDescription" placeholder="Краткое описание приложения" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="appFile">Выберите APK файл</label>
+          <input type="file" id="appFile" name="appFile" accept=".apk" required />
+        </div>
+        <button type="submit">Добавить приложение</button>
+      </form>
+    </section>
+
+    <section aria-label="Список приложений">
+      <div class="apps-list" id="appsList">
+        <!-- Здесь будут отображаться добавленные приложения -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2026 ApkHub — Каталог APK приложений
+  </footer>
+
+  <script>
+    const appForm = document.getElementById('appForm');
+    const appsList = document.getElementById('appsList');
+    const errorDiv = document.getElementById('error');
+
+    // Загружаем приложения из localStorage
+    let apps = JSON.parse(localStorage.getItem('apkhub_apps')) || [];
+
+    function renderApps() {
+      appsList.innerHTML = '';
+      if (apps.length === 0) {
+        appsList.innerHTML = '<p>Пока нет добавленных приложений.</p>';
+        return;
+      }
+      apps.forEach((app, index) => {
+        const card = document.createElement('article');
+        card.className = 'app-card';
+
+        // Создаем ссылку для скачивания из base64
+        const blob = base64ToBlob(app.fileData, 'application/vnd.android.package-archive');
+        const url = URL.createObjectURL(blob);
+
+        card.innerHTML = `
+          <h3 class="app-title">${escapeHtml(app.name)}</h3>
+          <p class="app-description">${escapeHtml(app.description)}</p>
+          <div class="app-file" title="Имя файла">${escapeHtml(app.fileName)}</div>
+          <div class="app-actions">
+            <a href="${url}" download="${escapeHtml(app.fileName)}" aria-label="Скачать ${escapeHtml(app.name)}">Скачать APK</a>
+            <button aria-label="Удалить ${escapeHtml(app.name)}" data-index="${index}">Удалить</button>
+          </div>
+        `;
+        appsList.appendChild(card);
+      });
+
+      // Добавляем обработчики удаления
+      appsList.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = e.target.getAttribute('data-index');
+          if (idx !== null) {
+            apps.splice(idx, 1);
+            localStorage.setItem('apkhub_apps', JSON.stringify(apps));
+            renderApps();
+          }
+        });
+      });
+    }
+
+    // Экранирование HTML для безопасности
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Конвертация base64 в Blob
+    function base64ToBlob(base64, mime) {
+      const byteChars = atob(base64);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      return new Blob([byteArray], { type: mime });
+    }
+
+    function showError(message) {
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    function clearError() {
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
+
+    appForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearError();
+
+      const name = appForm.appName.value.trim();
+      const description = appForm.appDescription.value.trim();
+      const fileInput = appForm.appFile;
+      const file = fileInput.files[0];
+
+      if (!name || !description || !file) {
+        showError('Пожалуйста, заполните все поля и выберите APK файл.');
+        return;
+      }
+
+      if (file.type !== 'application/vnd.android.package-archive' && !file.name.toLowerCase().endsWith('.apk')) {
+        showError('Пожалуйста, выберите корректный APK файл.');
+        return;
+      }
+
+      // Ограничение размера файла (например, 100МБ)
+      const maxSizeMB = 100МБ;
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        showError(`Файл слишком большой. Максимальный размер: ${maxSizeMB} МБ.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const base64Data = event.target.result.split(',')[1]; // Убираем префикс data:...
+
+          apps.push({
+            name,
+            description,
+            fileName: file.name,
+            fileData: base64Data
+          });
+
+          localStorage.setItem('apkhub_apps', JSON.stringify(apps));
+          renderApps();
+          appForm.reset();
+        } catch (err) {
+          showError('Ошибка при обработке файла. Попробуйте другой файл.');
+          console.error(err);
+        }
+      };
+
+      reader.onerror = function() {
+        showError('Ошибка чтения файла. Попробуйте снова.');
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    // При загрузке страницы отрисовываем приложения
+    renderApps();
+  </script>
+</body>
+</html>
